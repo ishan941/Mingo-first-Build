@@ -48,8 +48,10 @@ window.require(["vs/editor/editor.main"], function () {
     colors: {},
   });
 
+  const initial =
+    localStorage.getItem("mingo.source") ?? "let x = 10;\nprint(x);";
   window.editor = monaco.editor.create(document.getElementById("editor"), {
-    value: "let x = 10;\nprint(x);",
+    value: initial,
     language: "mingo",
     theme: "mingoTheme",
     automaticLayout: true,
@@ -58,6 +60,7 @@ window.require(["vs/editor/editor.main"], function () {
 
   const runBtn = document.getElementById("runBtn");
   const consoleEl = document.getElementById("console");
+  const clearBtn = document.getElementById("clearBtn");
   const statusEl = document.getElementById("status");
 
   // Cmd/Ctrl+Enter to Run
@@ -108,9 +111,8 @@ window.require(["vs/editor/editor.main"], function () {
           label: "fn snippet",
           kind: monaco.languages.CompletionItemKind.Snippet,
           detail: "function",
-          insertTextRules: monaco.editor.InlayHintKind
-            ? undefined
-            : monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          insertTextRules:
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           insertText: "fn ${1:name}(${2:args}) {\n\t$0\n}",
         },
         {
@@ -156,6 +158,41 @@ window.require(["vs/editor/editor.main"], function () {
     consoleEl.scrollTop = consoleEl.scrollHeight;
   }
 
+  // Persist source between sessions
+  window.editor.onDidChangeModelContent(() => {
+    localStorage.setItem("mingo.source", window.editor.getValue());
+    scheduleDiagnostics();
+  });
+
+  let diagTimer = null;
+  async function scheduleDiagnostics() {
+    if (diagTimer) clearTimeout(diagTimer);
+    diagTimer = setTimeout(runDiagnostics, 250);
+  }
+
+  async function runDiagnostics() {
+    const src = window.editor.getValue();
+    try {
+      const res = await window.mingo.diagnostics(src);
+      if (!res || !Array.isArray(res.errors)) return;
+      const model = window.editor.getModel();
+      const markers = res.errors.map((e) => ({
+        severity: monaco.MarkerSeverity.Error,
+        message: e.msg || e.Msg || "Error",
+        startLineNumber: e.line || e.Line || 1,
+        startColumn: e.column || e.Column || 1,
+        endLineNumber: e.line || e.Line || 1,
+        endColumn: (e.column || e.Column || 1) + 1,
+      }));
+      monaco.editor.setModelMarkers(model, "mingo", markers);
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  // Kick initial diagnostics
+  scheduleDiagnostics();
+
   runBtn.addEventListener("click", async () => {
     statusEl.textContent = "Running...";
     consoleEl.textContent = "";
@@ -169,6 +206,10 @@ window.require(["vs/editor/editor.main"], function () {
       appendConsole(String(e));
       statusEl.textContent = "Error";
     }
+  });
+
+  clearBtn.addEventListener("click", () => {
+    consoleEl.textContent = "";
   });
 
   // Placeholder hooks for future features (autocomplete, debugging)

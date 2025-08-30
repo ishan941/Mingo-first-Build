@@ -10,6 +10,7 @@ build:
 	go build -o $(BIN_DIR)/repl ./cmd/repl
 	go build -o $(BIN_DIR)/run ./cmd/run
 	go build -o $(BIN_DIR)/vmrepl ./cmd/vmrepl
+	go build -o $(BIN_DIR)/diag ./cmd/diag
 
 test:
 	go test ./...

@@ -64,3 +64,27 @@ go build -o bin/vmrepl ./cmd/vmrepl
 ```sh
 go test ./...
 ```
+
+## Editor (Electron + Monaco)
+
+A simple desktop editor lives in `editor/` with syntax highlighting and a Run button that executes your code through the Go VM.
+
+Prerequisites:
+
+- Go toolchain installed
+- Node.js 18+ and npm
+
+Steps:
+
+```sh
+make build                # builds bin/run used by the editor
+cd editor
+npm install
+npm start
+```
+
+Usage:
+
+- Type code in the editor; press the Run ▶ button or Cmd/Ctrl+Enter to execute.
+- Output appears in the console panel; use Clear Console to reset.
+- The editor persists your last program locally between sessions.

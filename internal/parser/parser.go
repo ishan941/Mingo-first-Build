@@ -16,6 +16,7 @@ type Parser struct {
 	peekToken token.Token
 
 	errors []string
+	rich   []ParseError
 
 	prefixParseFns map[token.Type]prefixParseFn
 	infixParseFns  map[token.Type]infixParseFn
@@ -86,9 +87,17 @@ func New(l *lexer.Lexer) *Parser {
 
 func (p *Parser) Errors() []string { return p.errors }
 
+type ParseError struct {
+	Msg string
+	Pos token.Position
+}
+
+func (p *Parser) RichErrors() []ParseError { return p.rich }
+
 func (p *Parser) peekError(t token.Type) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+	p.rich = append(p.rich, ParseError{Msg: msg, Pos: p.peekToken.Pos})
 }
 
 func (p *Parser) nextToken() { p.curToken, p.peekToken = p.peekToken, p.l.NextToken() }
@@ -268,7 +277,9 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(p.curToken.Literal, 10, 64)
 	if err != nil {
-		p.errors = append(p.errors, fmt.Sprintf("could not parse %q as integer", p.curToken.Literal))
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		p.rich = append(p.rich, ParseError{Msg: msg, Pos: p.curToken.Pos})
 		return nil
 	}
 	lit.Value = value
@@ -446,6 +457,7 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 func (p *Parser) noPrefixParseFnError(t token.Type) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
+	p.rich = append(p.rich, ParseError{Msg: msg, Pos: p.curToken.Pos})
 }
 
 func (p *Parser) peekPrecedence() int {

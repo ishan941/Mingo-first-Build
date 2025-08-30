@@ -68,6 +68,39 @@ ipcMain.handle("run-mingo", async (event, source) => {
   });
 });
 
+// Optional: lightweight diagnostics by invoking Go parser via a tiny helper binary would be ideal,
+// but we can reuse the runner to just parse and return errors by using a special flag in future.
+// For now, keep the channel placeholder so the renderer can call it later without breaking.
+ipcMain.handle("mingo-diagnostics", async (_event, source) => {
+  const repoRoot = path.resolve(__dirname, "..");
+  const diagBin = path.join(
+    repoRoot,
+    "bin",
+    process.platform === "win32" ? "diag.exe" : "diag"
+  );
+  if (!fs.existsSync(diagBin)) {
+    return { errors: [], missing: true };
+  }
+  return new Promise((resolve) => {
+    const child = spawn(diagBin, [], { stdio: ["pipe", "pipe", "pipe"] });
+    let out = "";
+    let err = "";
+    child.stdout.on("data", (d) => (out += d.toString()));
+    child.stderr.on("data", (d) => (err += d.toString()));
+    child.on("close", () => {
+      try {
+        const parsed = JSON.parse(out || "[]");
+        resolve({ errors: parsed, err });
+      } catch (e) {
+        resolve({ errors: [], err: String(e) });
+      }
+    });
+    child.on("error", (e) => resolve({ errors: [], err: e.message }));
+    child.stdin.write(source);
+    child.stdin.end();
+  });
+});
+
 app.whenReady().then(() => {
   createWindow();
 
