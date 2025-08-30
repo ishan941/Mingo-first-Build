@@ -1,0 +1,17 @@
+{
+    "name": "mingo-editor",
+    "version": "0.1.0",
+    "private": true,
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "postinstall": "electron-builder install-app-deps"
+    },
+    "devDependencies": {
+        "electron": "28.2.0",
+        "electron-builder": "24.13.3"
+    },
+    "dependencies": {
+        "monaco-editor": "0.51.0"
+    }
+}

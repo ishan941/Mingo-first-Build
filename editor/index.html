@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; img-src 'self' data:;" />
+    <title>Mingo Editor</title>
+    <style>
+        html,
+        body,
+        #container {
+            height: 100%;
+            margin: 0;
+        }
+
+        #toolbar {
+            height: 40px;
+            background: #1e1e1e;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        #toolbar button {
+            margin-right: 10px;
+        }
+
+        #main {
+            display: grid;
+            grid-template-rows: 1fr 200px;
+            height: calc(100% - 40px);
+        }
+
+        #editor {
+            border-top: 1px solid #333;
+        }
+
+        #console {
+            background: #111;
+            color: #ddd;
+            font-family: monospace;
+            padding: 8px;
+            overflow: auto;
+        }
+
+        #status {
+            margin-left: auto;
+            opacity: 0.8;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toolbar">
+        <button id="runBtn">Run ▶</button>
+        <span id="status">Ready</span>
+    </div>
+    <div id="main">
+        <div id="editor"></div>
+        <pre id="console"></pre>
+    </div>
+    <!-- Monaco AMD loader -->
+    <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script src="renderer.js"></script>
+</body>
+
+</html>
