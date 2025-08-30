@@ -29,8 +29,71 @@
 
         #main {
             display: grid;
-            grid-template-rows: 1fr 200px;
+            grid-template-columns: 260px 1fr;
             height: calc(100% - 40px);
+        }
+
+        #sidebar {
+            border-right: 1px solid #333;
+            background: #151515;
+            overflow: auto;
+            resize: horizontal;
+            min-width: 180px;
+            max-width: 60vw;
+            padding: 8px 6px;
+        }
+
+        #fileTree {
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #ddd;
+            padding-left: 2px;
+        }
+
+        #fileTree .dir,
+        #fileTree .file {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #fileTree .dim {
+            opacity: 0.8;
+        }
+
+        #fileTree ul {
+            list-style: none;
+            margin: 0;
+            padding-left: 12px;
+        }
+
+        #fileTree li {
+            margin: 1px 0;
+        }
+
+        #fileTree .twisty {
+            width: 10px;
+            display: inline-block;
+            color: #bbb;
+        }
+
+        #fileTree .file.selected {
+            background: #264f78;
+            border-radius: 4px;
+            padding: 0 2px;
+        }
+
+        #fileTree .file:hover,
+        #fileTree .dir:hover {
+            color: #fff;
+        }
+
+        #content {
+            display: grid;
+            grid-template-rows: 1fr 200px;
         }
 
         #editor {
@@ -56,12 +119,21 @@
 <body>
     <div id="toolbar">
         <button id="runBtn">Run ▶</button>
+        <select id="examples" style="margin-left:8px; min-width: 200px;">
+            <option>Loading examples…</option>
+        </select>
         <button id="clearBtn">Clear Console</button>
+        <button id="formatBtn" title="Format (Shift+Alt+F / Cmd+Shift+F)">Format</button>
         <span id="status">Ready</span>
     </div>
     <div id="main">
-        <div id="editor"></div>
-        <pre id="console"></pre>
+        <div id="sidebar">
+            <div id="fileTree">Loading files…</div>
+        </div>
+        <div id="content">
+            <div id="editor"></div>
+            <pre id="console"></pre>
+        </div>
     </div>
     <!-- Monaco AMD loader -->
     <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
