@@ -1,14 +1,21 @@
 # Mingo Programming Language
 
-This is a tiny educational language with a lexer, parser, compiler to bytecode, and a VM.
-
-Currently implemented: the lexer.
+This is a tiny educational language with a lexer, parser, bytecode compiler, and a stack-based VM, plus REPLs.
 
 ## Layout
 
 - `internal/token`: token types and keyword lookup
 - `internal/lexer`: UTF-8 aware lexer with positions
-- `cmd/lex`: small CLI to print tokens for a source file or stdin
+- `internal/ast`: AST nodes for statements and expressions
+- `internal/parser`: Pratt parser and recursive-descent for statements
+- `internal/code`: bytecode instruction set and encoder/decoder
+- `internal/compiler`: AST -> bytecode compiler, symbol table
+- `internal/object`: runtime objects (int, bool, null, compiled function)
+- `internal/vm`: stack-based virtual machine
+- `cmd/lex`: token dump CLI
+- `cmd/repl`: parser REPL (prints AST)
+- `cmd/run`: compile+run a program
+- `cmd/vmrepl`: VM REPL that preserves state and echoes results
 
 ## Try it
 
@@ -23,6 +30,33 @@ Or pipe source:
 
 ```sh
 echo 'let x = 10; print(x);' | ./bin/lex
+```
+
+Build parser REPL (AST printer):
+
+```sh
+go build -o bin/repl ./cmd/repl
+./bin/repl
+```
+
+Build runner (compiler+VM):
+
+```sh
+go build -o bin/run ./cmd/run
+printf 'print(1+2);\nlet x = 10; print(x);\n' | ./bin/run
+```
+
+Build VM REPL (stateful, echoes expression results):
+
+```sh
+go build -o bin/vmrepl ./cmd/vmrepl
+./bin/vmrepl
+# examples:
+# 1+2;
+# let x = 5;
+# x;
+# x = x + 7;
+# x;
 ```
 
 ## Test
